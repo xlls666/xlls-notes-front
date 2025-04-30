@@ -6,7 +6,6 @@ import { toast, showConfirm, tansParams } from '@/utils/common'
 
 let timeout = 10000
 const baseUrl = config.baseUrl
-
 const request = config => {
   // 是否需要设置 token
   const isToken = (config.headers || {}).isToken === false

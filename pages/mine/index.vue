@@ -78,6 +78,9 @@
 
 <script>
   export default {
+    onLoad() {
+
+    },
     data() {
       return {
         name: this.$store.state.user.name,

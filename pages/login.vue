@@ -115,7 +115,15 @@
       loginSuccess(result) {
         // 设置用户信息
         this.$store.dispatch('GetInfo').then(res => {
-          this.$tab.reLaunch('/pages/index')
+          // 获取上一个页面路径
+          const lastPage = uni.getStorageSync('lastPage')
+          if (lastPage) {
+            uni.removeStorageSync('lastPage')
+            const fullRoute = lastPage.startsWith('/') ? lastPage : '/' + lastPage
+            this.$tab.reLaunch(fullRoute)
+          } else {
+            this.$tab.reLaunch('/pages/index')
+          }
         })
       }
     }

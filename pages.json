@@ -1,5 +1,11 @@
 {
   "pages": [{
+    "path": "pages/index",
+    "style": {
+      "navigationBarTitleText": "若依移动端框架",
+      "navigationStyle": "custom"
+    }
+  }, {
     "path": "pages/login",
     "style": {
       "navigationBarTitleText": "登录"
@@ -8,12 +14,6 @@
     "path": "pages/register",
     "style": {
       "navigationBarTitleText": "注册"
-    }
-  }, {
-    "path": "pages/index",
-    "style": {
-      "navigationBarTitleText": "若依移动端框架",
-      "navigationStyle": "custom"
     }
   }, {
     "path": "pages/work/index",

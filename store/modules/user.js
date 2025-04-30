@@ -81,8 +81,6 @@ const user = {
     GetInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
         getInfo().then(res => {
-          console.log('获取用户信息成功')
-          console.log(res)
           const user = res.user
           let avatar = user.avatar || ""
           if (!isHttp(avatar)) {
