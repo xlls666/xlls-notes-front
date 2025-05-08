@@ -3,7 +3,9 @@ import App from './App'
 import store from './store' // store
 import plugins from './plugins' // plugins
 import './permission' // permission
-Vue.use(plugins)
+import uView from '@/uni_modules/uview-ui'
+
+Vue.use(plugins).use(uView)
 
 Vue.config.productionTip = false
 Vue.prototype.$store = store

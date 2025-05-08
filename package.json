@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@dcloudio/uni-ui": "^1.5.7",
+    "dayjs": "^1.11.13",
+    "sass": "^1.87.0"
+  },
+  "devDependencies": {
+    "sass-loader": "^16.0.5"
+  }
+}
