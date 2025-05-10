@@ -1,5 +1,8 @@
 <template>
   <view :style="{ paddingTop: navBarHeight + 'px' }" class="notes-container">
+    <view v-if="!isLogin" class="login-prompt">
+        <text @click="goToLogin" class="login-button-text">登录即可解锁个人专属笔记系统</text>
+    </view>
     <!-- 笔记列表 -->
     <view v-for="note in list" :key="note.id" class="note-card">
       <view class="note-header">
@@ -23,34 +26,35 @@
     <!-- 没有更多内容 -->
     <view v-if="noMore" class="no-more-text">没有更多内容了</view>
     <uni-icons class="floating-icon" type="compose" size="30" color="#007AFF" @click="goToCreateNote()" />
-    <u-popup :show="show" mode="center" overlayOpacity="0.1" @close="close" >
-        <view class="popup-content">
-          <view>
-              <!-- 操作项 -->
-              <view class="popup-item" @click="editNote()">
-                <u-icon name="edit-pen" size="24" color="#666"></u-icon>
-                <text class="item-text">修改</text>
-              </view>
-              <!-- 删除按钮 -->
-              <view class="popup-item delete-item" @click="deleteNote()">
-                <u-icon name="trash" size="24" color="#ff5722"></u-icon>
-                <text class="item-text delete-text">删除</text>
-              </view>
-              <!-- 时间信息 -->
-              <view class="popup-time">
-                <text>创建时间: {{ selectedNote.createTime | formatTime }}</text>
-                <text>修改时间: {{ selectedNote.updateTime | formatTime }}</text>
-              </view>
-            </view>
+    <u-popup :show="show" mode="center" overlayOpacity="0.1" @close="close">
+      <view class="popup-content">
+        <view>
+          <!-- 操作项 -->
+          <view class="popup-item" @click="editNote()">
+            <u-icon name="edit-pen" size="24" color="#666"></u-icon>
+            <text class="item-text">修改</text>
+          </view>
+          <!-- 删除按钮 -->
+          <view class="popup-item delete-item" @click="deleteNote()">
+            <u-icon name="trash" size="24" color="#ff5722"></u-icon>
+            <text class="item-text delete-text">删除</text>
+          </view>
+          <!-- 时间信息 -->
+          <view class="popup-time">
+            <text>创建时间: {{ selectedNote.createTime | formatTime }}</text>
+            <text>修改时间: {{ selectedNote.updateTime | formatTime }}</text>
+          </view>
         </view>
-      </u-popup>
+      </view>
+    </u-popup>
   </view>
 </template>
 <script>
 import navBarMixin from '@/mixins/navBarMixin'
 import paginationMixin from '@/mixins/paginationMixin'
-import { getPersonalNotesList,putPersonalNotesRecycle } from '@/api/notes/notes'
+import { getPersonalNotesList, putPersonalNotesRecycle } from '@/api/notes/notes'
 import dayjs from 'dayjs'
+import { getToken } from '@/utils/auth'
 export default {
   mixins: [navBarMixin, paginationMixin],
   filters: {
@@ -60,6 +64,7 @@ export default {
   },
   data() {
     return {
+      isLogin: false,
       navBarHeight: 0, // 导航栏+状态栏总高度
       // 可选：覆盖默认分页大小
       pagination: {
@@ -71,8 +76,12 @@ export default {
     }
   },
   onShow() {
-    this.resetPagination()
-    this.loadNextPage()
+    this.isLogin = getToken() 
+    if (this.isLogin) {
+      this.resetPagination()
+      this.loadNextPage()
+    }
+
   },
   methods: {
     editNote() {
@@ -107,7 +116,7 @@ export default {
     },
     // 实现 loadNextPage 方法
     loadNextPage() {
-      this.loadData(getPersonalNotesList, {recycle: false}, 'records')
+      this.loadData(getPersonalNotesList, { recycle: false }, 'records')
     },
     handleMore(note) {
       this.selectedNote = note // 将当前 note 赋值给 selectedNote
@@ -119,12 +128,30 @@ export default {
       } else {
         this.$tab.navigateTo(`/pages/personal_notes/edit`)
       }
+    },
+    goToLogin() {
+      this.$tab.navigateTo('/pages/login');
     }
   }
 }
 </script>
 
 <style scoped>
+.login-prompt {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  /* Full screen height */
+}
+
+.login-button-text {
+  font-size: 32rpx;
+  color: black;
+  text-align: center;
+  word-break: break-all;
+}
+
 .popup-content {
   width: 600rpx;
   padding: 40rpx;
