@@ -27,6 +27,13 @@
       }
     },
     {
+      "path": "pages/personal_notes/search",  
+      "style": {
+        "navigationBarTitleText": "笔记搜索",
+        "navigationBarBackgroundColor":  "#f1f1f1"
+      }
+    },
+    {
       "path": "pages/register",
       "style": {
         "navigationBarTitleText": "注册"

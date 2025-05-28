@@ -1,8 +1,25 @@
 <template>
-  <view :style="{ paddingTop: navBarHeight + 'px' }" class="notes-container">
-    <view v-if="!isLogin" class="login-prompt">
-        <text @click="goToLogin" class="login-button-text">登录即可解锁个人专属笔记系统</text>
+  <view :style="{ paddingTop: (statusBarHeight + navBarHeight) + 'px' }" class="notes-container">
+    <!-- 顶部导航栏 -->
+    <view class="top-bar">
+      <view class="top-bar-left">
+        <!-- <u-icon name="menu" size="36" color="#333" class="menu-icon" @click="onMenuClick" /> -->
+        <text class="top-bar-title">xxx的个人笔记</text>
+      </view>
+      <view class="top-bar-right">
+        <!-- <view class="icon-wrapper" @click="onFilterClick">
+          <u-icon name="more" size="28" color="#333" />
+        </view> -->
+        <view class="icon-wrapper" @click="goToSearch">
+          <u-icon name="search" size="28" color="#333" />
+        </view>
+      </view>
     </view>
+
+    <view v-if="!isLogin" class="login-prompt">
+      <u-button type="primary" text="登录" shape="circle" size="large" @click="goToLogin"></u-button>
+    </view>
+
     <!-- 笔记列表 -->
     <view v-for="note in list" :key="note.id" class="note-card">
       <view class="note-header">
@@ -25,7 +42,7 @@
     <view v-if="loading" class="loading-text">加载中...</view>
     <!-- 没有更多内容 -->
     <view v-if="noMore" class="no-more-text">没有更多内容了</view>
-    <uni-icons class="floating-icon" type="compose" size="30" color="#007AFF" @click="goToCreateNote()" />
+    <uni-icons v-if="isLogin" class="floating-icon" type="compose" size="30" color="#007AFF" @click="goToCreateNote()" />
     <u-popup :show="show" mode="center" overlayOpacity="0.1" @close="close">
       <view class="popup-content">
         <view>
@@ -65,7 +82,8 @@ export default {
   data() {
     return {
       isLogin: false,
-      navBarHeight: 0, // 导航栏+状态栏总高度
+      navBarHeight: 0, // 导航栏高度（不含状态栏）
+      statusBarHeight: 0, // 状态栏高度
       // 可选：覆盖默认分页大小
       pagination: {
         current: 1,
@@ -76,7 +94,7 @@ export default {
     }
   },
   onShow() {
-    this.isLogin = getToken() 
+    this.isLogin = getToken()
     if (this.isLogin) {
       this.resetPagination()
       this.loadNextPage()
@@ -130,156 +148,188 @@ export default {
       }
     },
     goToLogin() {
-      this.$tab.navigateTo('/pages/login');
+      this.$tab.navigateTo('/pages/login')
+    },
+    goToSearch() {
+      this.$tab.navigateTo('/pages/personal_notes/search')
     }
   }
 }
 </script>
 
-<style scoped>
-.login-prompt {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  /* Full screen height */
-}
-
-.login-button-text {
-  font-size: 32rpx;
-  color: black;
-  text-align: center;
-  word-break: break-all;
-}
-
-.popup-content {
-  width: 600rpx;
-  padding: 40rpx;
-  background-color: #fff;
-  border-radius: 16rpx;
-}
-
-.popup-item {
-  display: flex;
-  align-items: center;
-  padding: 24rpx 0;
-  font-size: 28rpx;
-  color: #333;
-  border-bottom: 1rpx solid #eee;
-}
-
-.item-text {
-  margin-left: 20rpx;
-}
-
-.popup-divider {
-  height: 1rpx;
-  background-color: #eee;
-  margin: 24rpx 0;
-}
-
-.delete-item {
-  border-bottom: none;
-}
-
-.delete-text {
-  color: #ff5722;
-}
-
-.popup-time {
-  margin-top: 40rpx;
-  display: flex;
-  flex-direction: column;
-  font-size: 24rpx;
-  color: #999;
-}
-
+<style lang="scss" scoped>
 .notes-container {
   padding: 20rpx;
   background-color: #f8f9fa;
-}
 
-.note-card {
-  background-color: #ffffff;
-  border-radius: 16rpx;
-  margin-bottom: 30rpx;
-  padding: 24rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
-}
+  .login-prompt {
+    position: fixed;
+    left: 50%;
+    bottom: 20%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+  }
 
-.note-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 30rpx;
-  flex-wrap: wrap;
-  /* 允许换行，避免拥挤 */
-}
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10rpx;
 
-.note-tag {
-  font-size: 24rpx;
-  color: #007aff;
-  font-weight: 500;
-  padding: 4rpx 16rpx;
-  border-radius: 40rpx;
-  background-color: #e6f0ff;
-  margin-right: 20rpx;
-  /* 新增：与 ... 保持间距 */
-}
+    &-left {
+      display: flex;
+      align-items: center;
+    }
 
-.note-title-source {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
+    &-title {
+      font-size: 32rpx;
+      font-weight: bold;
+      margin-left: 10rpx;
+      color: #333;
+    }
 
-.note-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333333;
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
+    &-right {
+      display: flex;
+      align-items: center;
+      padding: 6rpx 12rpx;
 
-.note-source {
-  font-size: 24rpx;
-  color: #999999;
-  margin-left: 20rpx;
-  white-space: nowrap;
-}
+      .icon-wrapper {
+        margin-left: 12rpx;
+        cursor: pointer;
+      }
+    }
+  }
 
-.note-body {
-  display: flex;
-  flex-direction: column;
-}
+  .note-card {
+    background-color: #ffffff;
+    border-radius: 16rpx;
+    margin-bottom: 30rpx;
+    padding: 24rpx;
+    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
 
-.note-content {
-  font-size: 26rpx;
-  color: #666666;
-  line-height: 40rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
+    .note-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30rpx;
+      flex-wrap: wrap;
+      /* 允许换行，避免拥挤 */
 
-.floating-icon {
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
-}
+      .note-tag {
+        font-size: 24rpx;
+        color: #007aff;
+        font-weight: 500;
+        padding: 4rpx 16rpx;
+        border-radius: 40rpx;
+        background-color: #e6f0ff;
+        margin-right: 20rpx;
+        /* 新增：与 ... 保持间距 */
+      }
 
-.loading-text,
-.no-more-text {
-  text-align: center;
-  font-size: 24rpx;
-  color: #aaa;
-  margin: 20rpx 0;
+      .note-more {
+        font-size: 28rpx;
+        height: auto;
+      }
+    }
+
+    .note-title-source {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20rpx;
+
+      .note-title {
+        font-size: 32rpx;
+        font-weight: bold;
+        color: #333333;
+        flex: 1;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      .note-source {
+        font-size: 24rpx;
+        color: #999999;
+        margin-left: 20rpx;
+        white-space: nowrap;
+      }
+    }
+
+    .note-body {
+      display: flex;
+      flex-direction: column;
+
+      .note-content {
+        font-size: 26rpx;
+        color: #666666;
+        line-height: 40rpx;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+  }
+
+  .loading-text,
+  .no-more-text {
+    text-align: center;
+    font-size: 24rpx;
+    color: #aaa;
+    margin: 20rpx 0;
+  }
+
+  .floating-icon {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+  }
+
+  .menu-icon {
+    cursor: pointer;
+  }
+
+  .popup-content {
+    width: 600rpx;
+    padding: 40rpx;
+    background-color: #fff;
+    border-radius: 16rpx;
+
+    .popup-item {
+      display: flex;
+      align-items: center;
+      padding: 24rpx 0;
+      font-size: 28rpx;
+      color: #333;
+      border-bottom: 1rpx solid #eee;
+
+      &.delete-item {
+        border-bottom: none;
+
+        .delete-text {
+          color: #ff5722;
+        }
+      }
+
+      .item-text {
+        margin-left: 20rpx;
+      }
+    }
+
+    .popup-time {
+      margin-top: 40rpx;
+      display: flex;
+      flex-direction: column;
+      font-size: 24rpx;
+      color: #999;
+    }
+  }
 }
 </style>
