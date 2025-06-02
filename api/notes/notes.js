@@ -1,5 +1,14 @@
 import request from '@/utils/request'
 
+// ai搜索
+export function getAiNotesByKeyword(data) {
+  return request({
+    url: '/personal-notes/relative/ai-keyword',
+    method: 'get',
+    params: data
+  })
+}
+
 // 根据关键字查询es笔记
 export function getEsNotesByKeyword(data) {
   return request({

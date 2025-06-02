@@ -53,7 +53,7 @@
     <!-- 没有更多内容 -->
     <view v-if="noMore" class="no-more-text">没有更多内容了</view>
     <!-- 底部AI搜索按钮 -->
-    <button class="ai-search-btn" @click="onAiSearch">AI 查询 ></button>
+    <button class="ai-search-btn" @click="openAiSearch">AI 查询 </button>
     <u-popup :show="show" mode="center" overlayOpacity="0.1" @close="close">
       <view class="popup-content">
         <view>
@@ -75,11 +75,23 @@
         </view>
       </view>
     </u-popup>
+
+    <!-- AI搜索 -->
+    <u-popup :show="aiShow" mode="bottom" @close="() => { this.aiShow = false }">
+      <view class="ai-popup-container">
+        <u-text align="center" lineHeight="70" size="20" text="AI 搜索" class="popup-title"></u-text>
+        <view class="input-wrapper">
+          <u-textarea placeholder="请输入内容" border="surround" v-model="aiSearchText" class="ai-input"
+            height="150"></u-textarea>
+        </view>
+        <button class="ai-search-btn" @click="onAiSearch">搜索</button>
+      </view>
+    </u-popup>
   </view>
 </template>
 
 <script>
-import { getEsNotesByKeyword } from '@/api/notes/notes.js'
+import { getEsNotesByKeyword, getAiNotesByKeyword } from '@/api/notes/notes.js'
 import paginationMixin from '@/mixins/paginationMixin'
 import dayjs from 'dayjs'
 
@@ -99,7 +111,10 @@ export default {
       recentSearches: [],
       recentSearchShow: true,
       show: false,
-      selectedNote: {} // 用于存储当前选中的 note
+      selectedNote: {},
+      aiShow: false,
+      aiSearchText: '',
+      searchType: 1 // 搜索类型，1：普通搜索，2：AI搜索
     };
   },
   methods: {
@@ -108,37 +123,40 @@ export default {
         return
       }
       this.recentSearchShow = false
+      this.searchType = 1
       this.resetPagination()
       this.loadNextPage()
     },
     // 实现 loadNextPage 方法
     loadNextPage() {
-      this.loadData(getEsNotesByKeyword, { keyword: this.searchText }, 'records');
+      if (this.searchType === 1) {
+        this.loadData(getEsNotesByKeyword, { keyword: this.searchText }, 'records');
 
-      let keywordJson = uni.getStorageSync('es_search_keyword');
-      let keywordArray = keywordJson ? JSON.parse(keywordJson) : [];
+        let keywordJson = uni.getStorageSync('es_search_keyword');
+        let keywordArray = keywordJson ? JSON.parse(keywordJson) : [];
 
-      // 如果已存在该关键词，则先移除旧项
-      const index = keywordArray.indexOf(this.searchText);
-      if (index > -1) {
-        keywordArray.splice(index, 1);
+        // 如果已存在该关键词，则先移除旧项
+        const index = keywordArray.indexOf(this.searchText);
+        if (index > -1) {
+          keywordArray.splice(index, 1);
+        }
+
+        // 将当前搜索词插入到数组最前面
+        keywordArray.unshift(this.searchText);
+
+        // 保留最多 10 条记录
+        if (keywordArray.length > 10) {
+          keywordArray = keywordArray.slice(0, 10);
+        }
+
+        // 保存回 storage（以 JSON 字符串形式）
+        uni.setStorageSync('es_search_keyword', JSON.stringify(keywordArray));
+      } else if (this.searchType === 2) {
+        this.loadData(getAiNotesByKeyword, { keyword: this.aiSearchText }, 'records');
       }
 
-      // 将当前搜索词插入到数组最前面
-      keywordArray.unshift(this.searchText);
-
-      // 保留最多 10 条记录
-      if (keywordArray.length > 10) {
-        keywordArray = keywordArray.slice(0, 10);
-      }
-
-      // 保存回 storage（以 JSON 字符串形式）
-      uni.setStorageSync('es_search_keyword', JSON.stringify(keywordArray));
     },
-    // onTagClick(tag) {
-    //   this.searchText = tag;
-    //   // 这里可以添加搜索逻辑
-    // },
+
     onDeleteRecent(item) {
       this.recentSearches = this.recentSearches.filter(i => i !== item);
       uni.setStorageSync('es_search_keyword', JSON.stringify(this.recentSearches));
@@ -178,9 +196,16 @@ export default {
       this.selectedNote = note // 将当前 note 赋值给 selectedNote
       this.show = true
     },
+    openAiSearch() {
+      this.aiShow = true
+    },
     onAiSearch() {
       // AI 搜索逻辑
-      uni.showToast({ title: 'AI 搜索功能待实现', icon: 'none' });
+      this.aiShow = false
+      this.recentSearchShow = false
+      this.searchType = 2
+      this.resetPagination()
+      this.loadNextPage()
     }
   },
   onLoad() {
@@ -411,6 +436,11 @@ export default {
       font-size: 24rpx;
       color: #999;
     }
+  }
+
+  .ai-popup-container {
+    height: 900rpx;
+    padding: 0 40rpx;
   }
 }
 </style>
