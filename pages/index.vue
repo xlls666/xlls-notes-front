@@ -4,12 +4,12 @@
     <view class="top-bar">
       <view class="top-bar-left">
         <!-- <u-icon name="menu" size="36" color="#333" class="menu-icon" @click="onMenuClick" /> -->
-        <text class="top-bar-title">xxx的个人笔记</text>
+        <text class="top-bar-title">{{name ? name + '的' : ''}}个人笔记</text>
       </view>
       <view class="top-bar-right">
-        <!-- <view class="icon-wrapper" @click="onFilterClick">
-          <u-icon name="more" size="28" color="#333" />
-        </view> -->
+        <view class="icon-wrapper" @click="goToAI">
+          <u-icon name="AI" size="20" color="#333" />
+        </view>
         <view class="icon-wrapper" @click="goToSearch">
           <u-icon name="search" size="28" color="#333" />
         </view>
@@ -42,7 +42,8 @@
     <view v-if="loading" class="loading-text">加载中...</view>
     <!-- 没有更多内容 -->
     <view v-if="noMore" class="no-more-text">没有更多内容了</view>
-    <uni-icons v-if="isLogin" class="floating-icon" type="compose" size="30" color="#007AFF" @click="goToCreateNote()" />
+    <uni-icons v-if="isLogin" class="floating-icon" type="compose" size="30" color="#007AFF"
+      @click="goToCreateNote()" />
     <u-popup :show="show" mode="center" overlayOpacity="0.1" @close="close">
       <view class="popup-content">
         <view>
@@ -79,6 +80,11 @@ export default {
       return dayjs(time).format('YYYY-MM-DD HH:mm:ss')
     }
   },
+  computed: {
+    name() {
+      return this.$store.state.user.name
+    }
+  },
   data() {
     return {
       isLogin: false,
@@ -102,6 +108,9 @@ export default {
 
   },
   methods: {
+		goToAI(){
+      this.$tab.navigateTo('/pages/ai/rag')
+    },
     editNote() {
       this.show = false
       this.$tab.navigateTo(`/pages/personal_notes/edit?id=${this.selectedNote.id}`)

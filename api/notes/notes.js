@@ -1,22 +1,22 @@
 import request from '@/utils/request'
 
-// ai搜索
-export function getAiNotesByKeyword(data) {
-  return request({
-    url: '/personal-notes/relative/ai-keyword',
-    method: 'get',
-    params: data
-  })
-}
+// // ai搜索
+// export function getAiNotesByKeyword(data) {
+//   return request({
+//     url: '/personal-notes/relative/ai-keyword',
+//     method: 'get',
+//     params: data
+//   })
+// }
 
-// 根据关键字查询es笔记
-export function getEsNotesByKeyword(data) {
-  return request({
-    url: '/personal-notes/relative/es-keyword',
-    method: 'get',
-    params: data
-  })
-}
+// // 根据关键字查询es笔记
+// export function getEsNotesByKeyword(data) {
+//   return request({
+//     url: '/personal-notes/relative/es-keyword',
+//     method: 'get',
+//     params: data
+//   })
+// }
 
 // 删除个人笔记至回收站
 export function putPersonalNotesRecycle(data) {
